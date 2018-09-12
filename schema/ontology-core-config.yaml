@@ -1,0 +1,110 @@
+####
+#### The ontology description file for Helium CommonsShare
+####
+id: ontology
+schema_generating: true
+description: Ontology Term, Synonym, or Definition.
+display_name: Ontology
+document_category: ontology_class
+weight: 40
+boost_weights: annotation_class^3.0 annotation_class_label^5.5 description^1.0 comment^0.5 synonym^1.0 alternate_id^1.0 regulates_closure^1.0 regulates_closure_label^1.0
+result_weights: annotation_class^8.0 description^6.0 source^4.0 synonym^3.0 alternate_id^2.0
+filter_weights: source^4.0 subset^3.0 regulates_closure_label^1.0 is_obsolete^0.0
+fields:
+  - id: id
+    description: Term identifier.
+    display_name: Acc
+    type: string
+    property: [getIdentifier]
+  - id: description
+    description: "Term definition." 
+    display_name: Definition
+    type: string
+    property: [getDef]
+    searchable: true
+  - id: is_obsolete
+    description: Is the term obsolete?
+    display_name: Obsoletion
+    type: boolean
+    property: [getIsObsoleteBinaryString] # but how to fetch?
+  - id: comment # 
+    description: Term comment.
+    display_name: Comment
+    type: string
+    property: [getComment]
+    searchable: true
+  - id: synonym
+    description: Term synonyms.
+    display_name: Synonyms
+    type: string
+    property: [getOBOSynonymStrings]
+    cardinality: multi
+    searchable: true
+  - id: alternate_id
+    description: Alternate term identifier.
+    display_name: Alt ID
+    type: string
+    property: [getAnnotationPropertyValues, alt_id]
+    cardinality: multi
+  - id: replaced_by
+    description: Term that replaces this term.
+    display_name: Replaced By
+    type: string
+    property: [getAnnotationPropertyValues, replaced_by]
+    cardinality: multi
+  - id: consider
+    description: Others terms you might want to look at.
+    display_name: Consider
+    type: string
+    property: [getAnnotationPropertyValues, consider]
+    cardinality: multi
+  - id: subset
+    description: "Special use collections of terms."
+    display_name: Subset
+    type: string
+    property: [getSubsets]
+    cardinality: multi
+  - id: definition_xref
+    description: Definition cross-reference.
+    display_name: Def xref
+    type: string
+    property: [getDefXref]
+    cardinality: multi
+  - id: database_xref
+    description: Database cross-reference.
+    display_name: DB xref
+    type: string
+    property: [getXref]
+    cardinality: multi
+  - id: isa_closure
+    description: "Ancestral terms (is_a)."
+    display_name: Is-a
+    type: string
+    cardinality: multi
+    property:
+      - "getRelationIDClosure"
+  - id: isa_closure_label
+    description: "Ancestral terms (is_a)."
+    display_name: Is-a
+    type: string
+    cardinality: multi
+    property:
+      - "getRelationLabelClosure"
+    searchable: true
+  - id: isa_partof_closure
+    description: "Ancestral terms (is_a/part_of)."
+    display_name: Is-a/part-of
+    type: string
+    cardinality: multi
+    property:
+      - "getRelationIDClosure"
+      - "BFO:0000050"
+  - id: isa_partof_closure_label
+    description: "Ancestral terms (is_a/part_of)."
+    display_name: Is-a/part-of
+    type: string
+    cardinality: multi
+    property:
+      - "getRelationLabelClosure"
+      - "BFO:0000050"
+    searchable: true
