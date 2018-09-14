@@ -85,7 +85,6 @@ if __name__ == "__main__":
 
     for term in terms:
         count += 1
-        print("Processing term {}".format(term))
         if term not in term_map:
             term_map[term] = {}
         # id
@@ -131,8 +130,6 @@ if __name__ == "__main__":
 
         if count % 1000 == 0:
             print("{} terms processed".format(count))
-            docs = term_map.values()
-            term_map.clear()
 
     docs = term_map.values()
     load(docs)
