@@ -22,6 +22,11 @@ fields:
     type: string
     property: [getDef]
     searchable: true
+  - id: source
+    description: "Term namespace."
+    display_name: Ontology source
+    type: string
+    property: [getNamespace]
   - id: is_obsolete
     description: Is the term obsolete?
     display_name: Obsoletion

@@ -43,6 +43,14 @@ def get_closure(ont, term, relations, reflexive=False):
     closure = ancestors(ont, term, relations=relations, reflexive=reflexive)
     return closure
 
+def get_default_namespace(ont):
+    namespace = None
+    for t in ont.meta['basicPropertyValues']:
+        if t['pred'] == 'http://www.geneontology.org/formats/oboInOwl#default-namespace':
+            namespace = t['val']
+            break
+    return namespace
+
 def load(docs):
     """
     Load docs into Solr
@@ -58,6 +66,7 @@ if __name__ == "__main__":
 
     ontology_factory = OntologyFactory()
     ontology = ontology_factory.create(args.ontology)
+    default_namespace = get_default_namespace(ontology)
     terms = args.terms
     if terms is None:
         print("No terms provided. Creating Solr docs for all {} terms in {}".format(len(ontology.graph.nodes()), args.ontology))
@@ -75,13 +84,22 @@ if __name__ == "__main__":
         term_map[term]['id'] = term
         # description
         term_map[term]['description'] = ontology.text_definition(term)
+        # source
+        source = ontology._get_basic_property_value(term, 'OIO:hasOBONamespace')
+        if source is None or source == 'none':
+            # use default namespace
+            source = default_namespace
+        term_map[term]['source'] = source
         # is_obsolete
         term_map[term]['is_obsolete'] = ontology.is_obsolete(term)
         # comment
         term_map[term]['comment'] = ontology._get_meta_prop(term, 'comments')
         # synonym
         term_map[term]['synonym'] = ontology.synonyms(term)
-        # TODO: alternate_id
+        # alternate_id
+        alt_id = ontology._get_meta_prop(term, 'OIO:hasAlternativeId')
+        if alt_id is not None:
+            term_map[term]['alternate_id'] = alt_id
         # replaced_by
         term_map[term]['replaced_by'] = ontology.replaced_by(term)
         # consider

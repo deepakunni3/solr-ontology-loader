@@ -68,6 +68,8 @@
     <copyField source="description" dest="description_std"></copyField>
     <copyField source="description" dest="description_eng"></copyField>
     <copyField source="description" dest="description_kw"></copyField>
+    <!-- ontology: Term namespace. -->
+    <field name="source" type="string" required="false" multiValued="false" indexed="true" stored="true"></field>
     <!-- ontology: Is the term obsolete? -->
     <field name="is_obsolete" type="boolean" required="false" multiValued="false" indexed="true" stored="true"></field>
     <!-- ontology: Term comment. -->
