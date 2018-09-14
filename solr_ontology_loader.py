@@ -3,6 +3,14 @@ import pysolr
 import argparse
 import networkx as nx
 
+
+HAS_OBO_NAMESPACE = 'OIO:hasOBONamespace'
+HAS_ALTERNATIVE_ID = 'OIO:hasAlternativeId'
+CONSIDER = 'OIO:consider'
+
+SUBCLASS_OF = 'subClassOf'
+PART_OF = 'BFO:0000050'
+
 parser = argparse.ArgumentParser(description="A simple loader that parses an ontology and loads terms (and its properties) as documents into a configured Solr core.")
 parser.add_argument('--solr_url', type=str, required=True)
 parser.add_argument('--ontology', type=str, required=True)
@@ -85,7 +93,7 @@ if __name__ == "__main__":
         # description
         term_map[term]['description'] = ontology.text_definition(term)
         # source
-        source = ontology._get_basic_property_value(term, 'OIO:hasOBONamespace')
+        source = ontology._get_basic_property_value(term, HAS_OBO_NAMESPACE)
         if source is None or source == 'none':
             # use default namespace
             source = default_namespace
@@ -97,13 +105,13 @@ if __name__ == "__main__":
         # synonym
         term_map[term]['synonym'] = ontology.synonyms(term)
         # alternate_id
-        alt_id = ontology._get_meta_prop(term, 'OIO:hasAlternativeId')
+        alt_id = ontology._get_meta_prop(term, HAS_ALTERNATIVE_ID)
         if alt_id is not None:
             term_map[term]['alternate_id'] = alt_id
         # replaced_by
         term_map[term]['replaced_by'] = ontology.replaced_by(term)
         # consider
-        term_map[term]['consider'] = ontology._get_basic_property_value(term, 'OIO:consider')
+        term_map[term]['consider'] = ontology._get_basic_property_value(term, CONSIDER)
         # subset
         term_map[term]['subset'] = ontology.subsets(term)
         # definition_xref
@@ -113,11 +121,11 @@ if __name__ == "__main__":
         # database_xref
         term_map[term]['database_xref'] = ontology.xrefs(term)
         # isa_closure
-        term_map[term]['isa_closure'] = get_closure(ontology, term, ['subClassOf'], True)
+        term_map[term]['isa_closure'] = get_closure(ontology, term, [SUBCLASS_OF], True)
         # isa_closure_label
         term_map[term]['isa_closure_label'] = [ontology.label(x) for x in term_map[term]['isa_closure']]
         # isa_partof_closure
-        term_map[term]['isa_partof_closure'] = get_closure(ontology, term, ['subClassOf', 'BFO:0000050'], True)
+        term_map[term]['isa_partof_closure'] = get_closure(ontology, term, [SUBCLASS_OF, PART_OF], True)
         # isa_partof_closure_label
         term_map[term]['isa_partof_closure_label'] = [ontology.label(x) for x in term_map[term]['isa_closure']]
 
