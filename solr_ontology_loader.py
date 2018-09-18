@@ -67,6 +67,7 @@ def load(docs):
     solr.add(docs)
 
 solr = None
+DOCUMENT_CATEGORY = "ontology_class"
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -87,6 +88,7 @@ if __name__ == "__main__":
         count += 1
         if term not in term_map:
             term_map[term] = {}
+            term_map[term]['document_category'] = DOCUMENT_CATEGORY
         # id
         term_map[term]['id'] = term
         # description
