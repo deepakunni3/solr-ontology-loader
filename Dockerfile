@@ -10,18 +10,22 @@ ENV SOLR_USER="solr" \
     SOLR_UID="89830" \
     SOLR_GROUP="solr" \
     SOLR_GID="89830" \
-    SOLR_VERSION="4.3.0" \ 
-    SOLR_DOWNLOAD_URL=https://archive.apache.org/dist/lucene/solr/4.3.0/solr-4.3.0.tgz
+    SOLR_VERSION="4.10.4"
+
+ENV SOLR_DISTRIBUTION="solr-${SOLR_VERSION}"
+ENV SOLR_DOWNLOAD_URL=https://archive.apache.org/dist/lucene/solr/${SOLR_VERSION}/${SOLR_DISTRIBUTION}.tgz
 
 # Set user and group
 RUN groupadd -r --gid $SOLR_GID $SOLR_GROUP && \
   useradd -r --uid $SOLR_UID --gid $SOLR_GID $SOLR_USER
 
+RUN echo "${SOLR_VERSION} ${SOLR_DISTRIBUTION} ${SOLR_DOWNLOAD_URL}"
+
 # Download Solr
 RUN mkdir /opt/solr && \
   cd /opt/solr && \
-  wget "${SOLR_DOWNLOAD_URL}" && \
-  tar -xvzf solr-4.3.0.tgz
+  wget ${SOLR_DOWNLOAD_URL} && \
+  tar -xvzf ${SOLR_DISTRIBUTION}.tgz
 
 RUN chown -R $SOLR_USER:$SOLR_GROUP /opt/solr
 
@@ -39,19 +43,18 @@ RUN wget http://purl.obolibrary.org/obo/uberon/basic.obo -O /opt/solr/solr-ontol
 
 # Configure Solr
 RUN set -e; \
-  mkdir /opt/solr/solr-4.3.0/example/solr/ontology-core && \
-  mkdir /opt/solr/solr-4.3.0/example/solr/ontology-core/conf && \
-  cp /opt/solr/solr-4.3.0/example/solr/collection1/conf/solrconfig.xml /opt/solr/solr-4.3.0/example/solr/ontology-core/conf && \
-  cp /opt/solr/solr-4.3.0/example/solr/collection1/conf/elevate.xml /opt/solr/solr-4.3.0/example/solr/ontology-core/conf && \
-  cp /opt/solr/solr-ontology-loader/schema/ontology-core-schema.xml /opt/solr/solr-4.3.0/example/solr/ontology-core/conf/schema.xml
+  mkdir /opt/solr/${SOLR_DISTRIBUTION}/example/solr/ontology-core && \
+  mkdir /opt/solr/${SOLR_DISTRIBUTION}/example/solr/ontology-core/conf && \
+  cp /opt/solr/${SOLR_DISTRIBUTION}/example/solr/collection1/conf/solrconfig.xml /opt/solr/${SOLR_DISTRIBUTION}/example/solr/ontology-core/conf && \
+  cp /opt/solr/${SOLR_DISTRIBUTION}/example/solr/collection1/conf/elevate.xml /opt/solr/${SOLR_DISTRIBUTION}/example/solr/ontology-core/conf && \
+  cp /opt/solr/solr-ontology-loader/schema/ontology-core-schema.xml /opt/solr/${SOLR_DISTRIBUTION}/example/solr/ontology-core/conf/schema.xml
 
-RUN echo '<?xml version="1.0" encoding="UTF-8" ?><solr persistent="true"><cores hostContext="${hostContext:solr}" defaultCoreName="ontology-core" host="${host:}" hostPort="${jetty.port:8983}" zkClientTimeout="${zkClientTimeout:15000}" adminPath="/admin/cores"><core loadOnStartup="true" transient="false" name="ontology-core" collection="ontology-core" instanceDir="ontology-core/"/></cores></solr>' > /opt/solr/solr-4.3.0/example/solr/solr.xml
+RUN echo '<?xml version="1.0" encoding="UTF-8" ?><solr persistent="true"><cores hostContext="${hostContext:solr}" defaultCoreName="ontology-core" host="${host:}" hostPort="${jetty.port:8983}" zkClientTimeout="${zkClientTimeout:15000}" adminPath="/admin/cores"><core loadOnStartup="true" transient="false" name="ontology-core" collection="ontology-core" instanceDir="ontology-core/"/></cores></solr>' > /opt/solr/${SOLR_DISTRIBUTION}/example/solr/solr.xml
 
 EXPOSE 8983
 WORKDIR /opt/solr
 
-ENTRYPOINT cd /opt/solr/solr-4.3.0/example && \
+ENTRYPOINT cd /opt/solr/${SOLR_DISTRIBUTION}/example && \
   (nohup java -jar start.jar &) && \
   python3 /opt/solr/solr-ontology-loader/solr_ontology_loader.py --solr_url http://localhost:8983/solr/ontology-core --ontology /opt/solr/solr-ontology-loader/uberon.obo && \
-  curl "http://localhost:8983/solr/admin/cores?action=STATUS&core=ontology-core&wt=json" > ontology-core-status.log && \
   /bin/bash
